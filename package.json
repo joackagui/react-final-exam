@@ -1,0 +1,11 @@
+{
+  "name": "react-final-exam",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "npm run dev --workspace=client & npm run dev --workspace=server & wait",
+    "build": "npm run build --workspace=client && npm run build --workspace=server",
+    "start": "npm run start --workspace=server"
+  }
+}

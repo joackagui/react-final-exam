@@ -1,0 +1,44 @@
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.status-card {
+  width: min(100%, 42rem);
+  padding: clamp(2rem, 5vw, 4rem);
+  border: 1px solid #2e5d78;
+  border-radius: 1rem;
+  background: rgba(6, 30, 48, 0.88);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.25);
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: #83d1e6;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-card h1 {
+  margin: 0;
+  color: #f4fbff;
+  font-size: clamp(2rem, 7vw, 4rem);
+}
+
+.status-card p:not(.eyebrow) {
+  color: #c9dce5;
+  line-height: 1.6;
+}
+
+.health-status {
+  margin-top: 2rem;
+  padding: 0.875rem 1rem;
+  border-left: 0.25rem solid #58c8a3;
+  background: rgba(88, 200, 163, 0.12);
+  color: #e2fff5 !important;
+  font-weight: 700;
+}
