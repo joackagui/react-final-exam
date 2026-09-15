@@ -1,70 +1,74 @@
-export type Character = 'pirate' | 'ghost'
+export type Character = "pirate" | "ghost";
 
 export type Direction =
-  | 'north'
-  | 'north_east'
-  | 'east'
-  | 'south_east'
-  | 'south'
-  | 'south_west'
-  | 'west'
-  | 'north_west'
+  | "north"
+  | "north_east"
+  | "east"
+  | "south_east"
+  | "south"
+  | "south_west"
+  | "west"
+  | "north_west";
+
+export type WindDirection = "north" | "east" | "south" | "west";
 
 export interface Position {
-  x: number
-  y: number
+  x: number;
+  y: number;
 }
 
 export interface Player {
-  id: string
-  number: 1 | 2
-  character: Character
-  shipId: string
+  id: string;
+  number: 1 | 2;
+  character: Character;
+  shipId: string;
 }
 
 export interface Ship {
-  id: string
-  playerId: string
-  character: Character
-  position: Position
-  orientation: Direction
-  orientationDegrees: number
-  targetOrientation: Direction
-  speed: 'high' | 'medium'
-  health: number
-  maxHealth: number
-  shotDamage: number
+  id: string;
+  playerId: string;
+  character: Character;
+  position: Position;
+  orientation: Direction;
+  orientationDegrees: number;
+  targetOrientation: Direction;
+  speed: "high" | "medium";
+  health: number;
+  maxHealth: number;
+  shotDamage: number;
 }
 
 export interface Obstacle {
-  id: string
-  position: Position
-  kind: 'rock'
+  id: string;
+  position: Position;
+  kind: "rock";
 }
 
 export interface Projectile {
-  id: string
-  ownerPlayerId: string
-  position: Position
-  direction: Direction
-  active: boolean
+  id: string;
+  ownerPlayerId: string;
+  position: Position;
+  direction: Direction;
+  active: boolean;
+  headingDegrees: number;
 }
 
 export interface Game {
-  id: string
-  status: 'esperando' | 'en_curso' | 'finalizada'
-  players: Player[]
-  ships: Ship[]
+  id: string;
+  status: "esperando" | "en_curso" | "finalizada";
+  players: Player[];
+  ships: Ship[];
   map: {
-    width: number
-    height: number
-    obstacles: Obstacle[]
-  }
+    width: number;
+    height: number;
+    obstacles: Obstacle[];
+  };
   wind: {
-    direction: Direction
-    changedAt: string
-    changedRecently: boolean
-  }
-  activeProjectiles: Projectile[]
-  winnerPlayerId: string | null
+    direction: WindDirection | null;
+    active: boolean;
+    changedAt: string;
+    changedRecently: boolean;
+  };
+  activeProjectiles: Projectile[];
+  winnerPlayerId: string | null;
 }

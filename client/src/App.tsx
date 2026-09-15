@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import type { Character, Direction, Game, Ship } from "./game-types";
+import type {
+  Character,
+  Direction,
+  Game,
+  Ship,
+  WindDirection,
+} from "./game-types";
 import "./App.css";
 
 const apiBaseUrl = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
@@ -17,8 +23,6 @@ type PlayerSetup = {
 
 type Action = "turn_left" | "turn_right" | "shoot";
 
-const TURN_REPEAT_MS = 180;
-
 const initialSetup: [PlayerSetup, PlayerSetup] = [
   { id: "Jugador-1", character: "pirate" },
   { id: "Jugador-2", character: "ghost" },
@@ -35,15 +39,28 @@ const directionLabel: Record<Direction, string> = {
   north_west: "Noroeste",
 };
 
-const windIconRotation: Record<Direction, number> = {
+const windIconRotation: Record<WindDirection, number> = {
   north: -90,
-  north_east: -45,
   east: 0,
-  south_east: 45,
   south: 90,
-  south_west: 135,
   west: 180,
-  north_west: 225,
+};
+
+const windAngle: Record<WindDirection, number> = {
+  north: 0,
+  east: 90,
+  south: 180,
+  west: 270,
+};
+
+const windLineStyle: Record<
+  WindDirection,
+  { lineAngle: string; flowX: string; flowY: string }
+> = {
+  north: { lineAngle: "90deg", flowX: "0", flowY: "-7rem" },
+  east: { lineAngle: "0deg", flowX: "7rem", flowY: "0" },
+  south: { lineAngle: "90deg", flowX: "0", flowY: "7rem" },
+  west: { lineAngle: "0deg", flowX: "-7rem", flowY: "0" },
 };
 
 function getPlayerName(game: Game, playerId: string | null): string {
@@ -229,16 +246,7 @@ function App() {
 
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    const rotationTimer = window.setInterval(() => {
-      for (const [key, rotation] of Object.entries(rotationKeys)) {
-        if (pressedKeys.current.has(key)) {
-          void sendAction(rotation.playerId, rotation.action);
-        }
-      }
-    }, TURN_REPEAT_MS);
-
     return () => {
-      window.clearInterval(rotationTimer);
       pressedKeys.current.clear();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
@@ -433,8 +441,27 @@ function App() {
       <section
         className="game-map"
         aria-label="Mapa de batalla naval"
-        style={seaBackgroundStyle}
+        style={
+          {
+            ...seaBackgroundStyle,
+            "--wind-angle": `${windAngle[game.wind.direction ?? "north"]}deg`,
+            "--wind-line-angle":
+              windLineStyle[game.wind.direction ?? "north"].lineAngle,
+            "--wind-flow-x":
+              windLineStyle[game.wind.direction ?? "north"].flowX,
+            "--wind-flow-y":
+              windLineStyle[game.wind.direction ?? "north"].flowY,
+          } as React.CSSProperties
+        }
       >
+        <div
+          className={`wind-streams ${game.wind.active ? "wind-active" : ""}`}
+          aria-hidden="true"
+        >
+          <span />
+          <span />
+          <span />
+        </div>
         {game.map.obstacles.map((obstacle, index) => (
           <div
             className={`rock ${index % 3 === 0 ? "rock-long" : "rock-small"}`}
@@ -461,7 +488,12 @@ function App() {
           <span
             className="projectile"
             key={projectile.id}
-            style={positionStyle(projectile.position, game)}
+            style={
+              {
+                ...positionStyle(projectile.position, game),
+                "--projectile-angle": `${projectile.headingDegrees}deg`,
+              } as React.CSSProperties
+            }
             aria-label="Proyectil activo"
           />
         ))}
@@ -496,7 +528,7 @@ function App() {
         ))}
       </header>
 
-      {windNotice && (
+      {windNotice && game.wind.active && (
         <div className="wind-notice" role="status">
           <span
             aria-hidden="true"

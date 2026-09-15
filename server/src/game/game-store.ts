@@ -9,20 +9,22 @@ import type {
   Player,
   Projectile,
   Ship,
+  WindDirection,
 } from "./types.js";
 
 const GRID_WIDTH = 30;
 const GRID_HEIGHT = 18;
-const MIN_OBSTACLE_COUNT = 8;
+const MIN_OBSTACLE_COUNT = 15;
 const MAX_OBSTACLE_COUNT = 15;
 const STARTING_AREA_RADIUS = 4;
-const WIND_CHANGE_INTERVAL_MS = 30_000;
+const WIND_CHANGE_INTERVAL_MS = 15_000;
 const WIND_NOTICE_DURATION_MS = 3_000;
 const TICK_MS = 100;
 const PROJECTILE_SPEED = 6;
-const WIND_PROJECTILE_INFLUENCE = 0.15;
-const WIND_SPEED_INFLUENCE = 0.1;
-const WIND_TURN_INFLUENCE = 0.1;
+const WIND_PROJECTILE_INFLUENCE = 1.5;
+const WIND_SPEED_INFLUENCE = 0.6;
+const WIND_TURN_INFLUENCE = 0.65;
+const WIND_DRIFT_DEGREES_PER_SECOND = 10;
 const TURN_STEP_DEGREES = 12;
 const SHIP_COLLISION_DAMAGE = 10;
 
@@ -48,6 +50,8 @@ const directionAngles: Record<Direction, number> = {
   north_west: 315,
 };
 
+const windDirections: WindDirection[] = ["north", "east", "south", "west"];
+
 const games = new Map<string, Game>();
 
 function normalizeAngle(angle: number): number {
@@ -72,8 +76,8 @@ function vectorFromAngle(angle: number): GridPosition {
   return { x: Math.sin(radians), y: -Math.cos(radians) };
 }
 
-function randomDirection(): Direction {
-  return directions[Math.floor(Math.random() * directions.length)];
+function randomWindDirection(): WindDirection {
+  return windDirections[Math.floor(Math.random() * windDirections.length)];
 }
 
 function isNearStartingArea(
@@ -194,7 +198,8 @@ export function createGame(request: CreateGameRequest): Game {
       obstacles: generateObstacles([piratePosition, ghostPosition]),
     },
     wind: {
-      direction: randomDirection(),
+      direction: null,
+      active: false,
       changedAt: createdAt.toISOString(),
       nextChangeAt: new Date(
         createdAt.getTime() + WIND_CHANGE_INTERVAL_MS,
@@ -219,7 +224,14 @@ export function getGame(gameId: string): Game | undefined {
   return game;
 }
 
-function windAlignment(shipAngle: number, windDirection: Direction): number {
+function windAlignment(
+  shipAngle: number,
+  windDirection: WindDirection | null,
+): number {
+  if (!windDirection) {
+    return 0;
+  }
+
   const shipVector = vectorFromAngle(shipAngle);
   const windVector = vectorFromAngle(directionAngles[windDirection]);
   return shipVector.x * windVector.x + shipVector.y * windVector.y;
@@ -227,7 +239,7 @@ function windAlignment(shipAngle: number, windDirection: Direction): number {
 
 function rotateShip(
   ship: Ship,
-  windDirection: Direction,
+  windDirection: WindDirection | null,
   elapsedSeconds: number,
 ): void {
   const difference =
@@ -251,10 +263,25 @@ function rotateShip(
     );
   }
 
+  if (windDirection) {
+    const windAngle = directionAngles[windDirection];
+    const windCrossProduct =
+      vectorFromAngle(ship.orientationDegrees).x *
+        vectorFromAngle(windAngle).y -
+      vectorFromAngle(ship.orientationDegrees).y * vectorFromAngle(windAngle).x;
+    ship.orientationDegrees = normalizeAngle(
+      ship.orientationDegrees +
+        windCrossProduct * WIND_DRIFT_DEGREES_PER_SECOND * elapsedSeconds,
+    );
+  }
+
   ship.orientation = directionFromAngle(ship.orientationDegrees);
 }
 
-function speedWithWind(ship: Ship, windDirection: Direction): number {
+function speedWithWind(
+  ship: Ship,
+  windDirection: WindDirection | null,
+): number {
   return (
     ship.baseSpeed *
     (1 +
@@ -327,7 +354,9 @@ function moveProjectile(
   elapsedSeconds: number,
 ): void {
   const projectileVector = vectorFromAngle(projectile.headingDegrees);
-  const windVector = vectorFromAngle(directionAngles[game.wind.direction]);
+  const windVector = game.wind.direction
+    ? vectorFromAngle(directionAngles[game.wind.direction])
+    : { x: 0, y: 0 };
   const nextPosition = {
     x:
       projectile.position.x +
@@ -349,6 +378,14 @@ function moveProjectile(
     return;
   }
 
+  projectile.headingDegrees = normalizeAngle(
+    (Math.atan2(
+      nextPosition.x - projectile.position.x,
+      -(nextPosition.y - projectile.position.y),
+    ) *
+      180) /
+      Math.PI,
+  );
   projectile.position = nextPosition;
   const target = game.ships.find(
     (ship) =>
@@ -367,7 +404,8 @@ function moveProjectile(
 
 function changeWindIfNeeded(game: Game, now: Date): void {
   if (now.getTime() >= new Date(game.wind.nextChangeAt).getTime()) {
-    game.wind.direction = randomDirection();
+    game.wind.active = !game.wind.active;
+    game.wind.direction = game.wind.active ? randomWindDirection() : null;
     game.wind.changedAt = now.toISOString();
     game.wind.nextChangeAt = new Date(
       now.getTime() + WIND_CHANGE_INTERVAL_MS,
@@ -433,7 +471,7 @@ export function applyAction(game: Game, request: GameActionRequest): void {
 
   if (request.action === "turn_left") {
     ship.targetOrientationDegrees = normalizeAngle(
-      ship.orientationDegrees - TURN_STEP_DEGREES,
+      ship.targetOrientationDegrees - TURN_STEP_DEGREES,
     );
     ship.targetOrientation = directionFromAngle(ship.targetOrientationDegrees);
     return;
@@ -441,7 +479,7 @@ export function applyAction(game: Game, request: GameActionRequest): void {
 
   if (request.action === "turn_right") {
     ship.targetOrientationDegrees = normalizeAngle(
-      ship.orientationDegrees + TURN_STEP_DEGREES,
+      ship.targetOrientationDegrees + TURN_STEP_DEGREES,
     );
     ship.targetOrientation = directionFromAngle(ship.targetOrientationDegrees);
     return;
@@ -454,20 +492,16 @@ export function applyAction(game: Game, request: GameActionRequest): void {
     return;
   }
 
-  const bullets = Array.from(
-    { length: 3 },
-    (): Projectile => ({
-      id: randomUUID(),
-      ownerPlayerId: ship.playerId,
-      position: { ...ship.position },
-      direction: ship.orientation,
-      headingDegrees: ship.orientationDegrees,
-      speed: PROJECTILE_SPEED,
-      damage: ship.shotDamage,
-      active: true,
-    }),
-  );
-  game.activeProjectiles.push(...bullets);
+  game.activeProjectiles.push({
+    id: randomUUID(),
+    ownerPlayerId: ship.playerId,
+    position: { ...ship.position },
+    direction: ship.orientation,
+    headingDegrees: ship.orientationDegrees,
+    speed: PROJECTILE_SPEED,
+    damage: ship.shotDamage,
+    active: true,
+  });
 }
 
 /** Solo se invoca desde las pruebas E2E habilitadas explícitamente. */

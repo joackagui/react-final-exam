@@ -202,6 +202,49 @@ button:focus-visible {
   background: var(--sea-image) center / 28rem repeat;
 }
 
+.wind-streams {
+  position: absolute;
+  inset: -35%;
+  pointer-events: none;
+  display: none;
+  opacity: 0.36;
+  background: repeating-linear-gradient(
+    var(--wind-line-angle),
+    transparent 0 3.4rem,
+    rgba(224, 248, 255, 0.45) 3.5rem 3.62rem,
+    transparent 3.7rem 7rem
+  );
+  animation: wind-flow 2.8s linear infinite;
+}
+
+.wind-streams.wind-active {
+  display: block;
+}
+
+.wind-streams span {
+  position: absolute;
+  width: 4rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background: rgba(239, 253, 255, 0.7);
+  box-shadow: 0 0 0.7rem rgba(180, 235, 255, 0.7);
+}
+
+.wind-streams span:nth-child(1) {
+  top: 28%;
+  left: 18%;
+}
+
+.wind-streams span:nth-child(2) {
+  top: 62%;
+  left: 63%;
+}
+
+.wind-streams span:nth-child(3) {
+  top: 78%;
+  left: 35%;
+}
+
 .rock,
 .projectile,
 .ship {
@@ -266,6 +309,18 @@ button:focus-visible {
   border-radius: 50%;
   background: #ff9f32;
   box-shadow: 0 0 0.8rem #ffe07c;
+  transform: translate(-50%, -50%) rotate(var(--projectile-angle));
+}
+
+.projectile::after {
+  position: absolute;
+  top: 50%;
+  left: -0.8rem;
+  width: 0.8rem;
+  height: 0.16rem;
+  content: "";
+  background: rgba(255, 224, 124, 0.8);
+  transform: translateY(-50%);
 }
 
 .hud {
@@ -370,6 +425,15 @@ button:focus-visible {
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes wind-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: var(--wind-flow-x) var(--wind-flow-y);
   }
 }
 
