@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import type { Character, Direction, Game, Ship } from "./game-types";
 import "./App.css";
 
+const apiBaseUrl = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+const assetUrl = (assetName: string) =>
+  `${import.meta.env.BASE_URL}Assets/${assetName}`;
+
+function apiUrl(path: string): string {
+  return `${apiBaseUrl}${path}`;
+}
+
 type PlayerSetup = {
   id: string;
   character: Character;
@@ -65,6 +73,9 @@ function App() {
   const previousWindChange = useRef<string | null>(null);
   const windTimer = useRef<number | null>(null);
   const damageTimer = useRef<number | null>(null);
+  const seaBackgroundStyle = {
+    "--sea-image": `url("${assetUrl("sea.png")}")`,
+  } as React.CSSProperties;
 
   const gameId = game?.id;
   const gameStatus = game?.status;
@@ -96,7 +107,7 @@ function App() {
     setError(null);
 
     try {
-      const response = await fetch("/api/games", {
+      const response = await fetch(apiUrl("/api/games"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players: setup }),
@@ -122,7 +133,7 @@ function App() {
     }
 
     try {
-      const response = await fetch(`/api/games/${gameId}/action`, {
+      const response = await fetch(apiUrl(`/api/games/${gameId}/action`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId, action }),
@@ -146,7 +157,7 @@ function App() {
 
     async function pollGame() {
       try {
-        const response = await fetch(`/api/games/${gameId}`);
+        const response = await fetch(apiUrl(`/api/games/${gameId}`));
         const nextGame = await readJson<Game>(response);
 
         if (isActive) {
@@ -297,7 +308,7 @@ function App() {
 
   if (game?.status === "finalizada") {
     return (
-      <main className="result-screen">
+      <main className="result-screen" style={seaBackgroundStyle}>
         <section className="result-card" aria-labelledby="result-title">
           <p className="eyebrow">La batalla terminó</p>
           <h1 id="result-title">
@@ -314,7 +325,7 @@ function App() {
 
   if (!game) {
     return (
-      <main className="selector-screen">
+      <main className="selector-screen" style={seaBackgroundStyle}>
         <section className="selector-card" aria-labelledby="selector-title">
           <div className="selector-heading">
             <h1 id="selector-title">Elige tu tripulación</h1>
@@ -326,7 +337,7 @@ function App() {
             <article className="character-card pirate-card">
               <div className="character-preview ship-preview">
                 <img
-                  src="/Assets/black-pearl.png"
+                  src={assetUrl("black-pearl.png")}
                   alt="Barco Pirata visto desde arriba"
                 />
               </div>
@@ -360,7 +371,7 @@ function App() {
             <article className="character-card ghost-card">
               <div className="character-preview ship-preview">
                 <img
-                  src="/Assets/flying-dutchman.png"
+                  src={assetUrl("flying-dutchman.png")}
                   alt="Barco Fantasma visto desde arriba"
                 />
               </div>
@@ -418,7 +429,11 @@ function App() {
 
   return (
     <main className="game-screen">
-      <section className="game-map" aria-label="Mapa de batalla naval">
+      <section
+        className="game-map"
+        aria-label="Mapa de batalla naval"
+        style={seaBackgroundStyle}
+      >
         {game.map.obstacles.map((obstacle, index) => (
           <div
             className={`rock ${index % 3 === 0 ? "rock-long" : "rock-small"}`}
@@ -433,8 +448,8 @@ function App() {
             <img
               src={
                 index % 3 === 0
-                  ? "/Assets/long-rock.png"
-                  : "/Assets/small-rock.png"
+                  ? assetUrl("long-rock.png")
+                  : assetUrl("small-rock.png")
               }
               alt="Roca"
             />
@@ -460,8 +475,8 @@ function App() {
             <img
               src={
                 ship.character === "pirate"
-                  ? "/Assets/black-pearl.png"
-                  : "/Assets/flying-dutchman.png"
+                  ? assetUrl("black-pearl.png")
+                  : assetUrl("flying-dutchman.png")
               }
               alt=""
               style={{ transform: `rotate(${ship.orientationDegrees}deg)` }}

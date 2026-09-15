@@ -6,7 +6,7 @@
   padding: 2rem;
   background:
     linear-gradient(rgba(2, 20, 35, 0.82), rgba(2, 20, 35, 0.82)),
-    url("/Assets/sea.png") center / 32rem repeat;
+    var(--sea-image) center / 32rem repeat;
 }
 
 .selector-card,
@@ -199,7 +199,7 @@ button:focus-visible {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: url("/Assets/sea.png") center / 28rem repeat;
+  background: var(--sea-image) center / 28rem repeat;
 }
 
 .rock,

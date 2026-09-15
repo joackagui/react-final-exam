@@ -18,12 +18,15 @@ El resultado comprobado fue **4 pruebas aprobadas**. Para defensa visual: `npm r
 
 Fuentes: [Playwright Installation](https://playwright.dev/docs/intro) y [Playwright Web server](https://playwright.dev/docs/test-webserver).
 
-## Render
+## GitHub Pages y Render
 
-Se eligió Render Web Service porque soporta Express, permite build/start commands, asigna URL pública y usa `PORT`. Como Express sirve API y `client/dist`, no hace falta hosting estático separado ni Docker.
+GitHub Pages se eligió para publicar el frontend Vite como un artefacto estático mediante GitHub Actions. El workflow usa `configure-pages`, `upload-pages-artifact` y `deploy-pages`, y construye con `VITE_BASE_PATH=/react-final-exam/` para que los recursos funcionen bajo la URL del repositorio.
 
-La configuración prevista es `npm ci && npm run build`, `npm run start` y health check `/api/health`. Render provee `PORT`; se configura `NODE_ENV=production` y no `ENABLE_TEST_ROUTES`. GitHub Actions compila y llama al Deploy Hook guardado en el secret `RENDER_DEPLOY_HOOK_URL`; `workflow_dispatch` permite dispararlo en la defensa.
+GitHub Pages no ejecuta Node.js ni Express. Por eso el backend debe mantenerse en un Web Service separado, para el que Render es una opción adecuada: soporta Express, permite build/start commands, asigna URL pública y usa `PORT`. El frontend recibe esa URL mediante la variable de repositorio `VITE_API_URL`; Express acepta el origen de Pages mediante `CORS_ORIGIN`.
 
-Limitaciones: todavía no existe Web Service ni URL pública; el estado en memoria se pierde al redeploy; y un plan gratuito puede introducir inicio en frío. La URL se registrará en README solo después de publicar el servicio.
+La configuración del backend es `npm ci && npm run build`, `npm run start` y health check `/api/health`. Render provee `PORT`; se configura `NODE_ENV=production`, `CORS_ORIGIN` con la URL de Pages y no `ENABLE_TEST_ROUTES`. El workflow separado puede llamar al Deploy Hook guardado en el secret `RENDER_DEPLOY_HOOK_URL`; `workflow_dispatch` permite dispararlo manualmente.
+
+Limitaciones: Pages por sí solo muestra la interfaz pero no puede crear partidas sin `VITE_API_URL`; el backend conserva el estado en memoria y lo pierde al redeploy; además, un plan gratuito puede introducir inicio en frío. La URL concreta de Pages depende del propietario real del repositorio.
 
 Fuente: [Render Web Services](https://render.com/docs/web-services).
+Fuente: [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).

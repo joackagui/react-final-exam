@@ -2,7 +2,7 @@
 
 Juego naval top-down local para dos personas. React representa la partida y Express conserva el estado autoritativo: movimiento, viento, daños, proyectiles y victoria.
 
-> **Despliegue:** pendiente de crear el Web Service en Render. La URL pública se añadirá aquí después de publicar el servicio; no se inventó una antes del despliegue.
+> **Despliegue:** el frontend se publica en GitHub Pages y el backend Express debe publicarse por separado. La URL final depende del usuario/organización de GitHub y del Web Service de backend.
 
 ## Requisitos e instalación
 
@@ -30,6 +30,23 @@ npx playwright install chromium
 
 Para ejecutar solo una prueba o un archivo: `npx playwright test e2e/sea-battle.spec.ts -g "nombre de la prueba"`.
 
+## Ejecución local paso a paso
+
+1. Instala Node.js 22 o superior.
+2. Clona el repositorio y entra en su carpeta raíz.
+3. Instala dependencias con `npm ci`.
+4. Inicia el cliente y el servidor con `npm run dev`.
+5. Abre `http://localhost:5173`. Vite redirige `/api` y `/Assets` al servidor local en el puerto `3000`.
+
+Para probar el build como producción local:
+
+```bash
+npm run build
+npm run start
+```
+
+Después abre `http://localhost:3000`.
+
 ## Arquitectura
 
 ```text
@@ -56,14 +73,17 @@ Ejemplos completos y errores: [docs/api.md](docs/api.md). El resto de documentac
 
 ## Variables de entorno
 
-| Variable                 | Uso                                       | Producción                                                      |
-| ------------------------ | ----------------------------------------- | --------------------------------------------------------------- |
-| `PORT`                   | Puerto de Express; por defecto `3000`.    | Render la proporciona automáticamente.                          |
-| `NODE_ENV`               | Entorno de ejecución.                     | Configurar como `production`; el código no lo lee directamente. |
-| `ENABLE_TEST_ROUTES`     | Habilita el endpoint E2E de finalización. | No configurar.                                                  |
-| `RENDER_DEPLOY_HOOK_URL` | URL usada por el workflow de despliegue.  | Secret de GitHub, nunca variable pública.                       |
+| Variable                 | Uso                                                      | Producción                                                                                |
+| ------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `PORT`                   | Puerto de Express; por defecto `3000`.                   | Render la proporciona automáticamente.                                                    |
+| `NODE_ENV`               | Entorno de ejecución.                                    | Configurar como `production`; el código no lo lee directamente.                           |
+| `ENABLE_TEST_ROUTES`     | Habilita el endpoint E2E de finalización.                | No configurar.                                                                            |
+| `RENDER_DEPLOY_HOOK_URL` | URL usada por el workflow de despliegue.                 | Secret de GitHub, nunca variable pública.                                                 |
+| `VITE_BASE_PATH`         | Prefijo de recursos del frontend.                        | `/react-final-exam/` en Pages; `/` localmente.                                            |
+| `VITE_API_URL`           | URL base del backend Express para el build del frontend. | Variable de repositorio, por ejemplo `https://mi-backend.onrender.com`; no es un secreto. |
+| `CORS_ORIGIN`            | Origen permitido por Express.                            | URL de Pages; por defecto `*` para desarrollo.                                            |
 
-## Render y CI/CD
+## GitHub Pages, Render y CI/CD
 
 Se recomienda un único **Web Service** de Render: Express ya sirve API y frontend compilado; Docker no aporta beneficio para esta arquitectura.
 
@@ -74,6 +94,10 @@ Health Check Path: /api/health
 NODE_ENV: production
 ```
 
-Crear un Deploy Hook de Render y guardar la URL como secret `RENDER_DEPLOY_HOOK_URL`. El workflow se activa en push a `main` o manualmente con **Actions → Deploy to Render → Run workflow**.
+El workflow `.github/workflows/pages.yml` instala dependencias, construye `client/` con base `/react-final-exam/`, sube `client/dist` y lo despliega con Pages. Se activa al hacer push a `main` o manualmente desde **Actions → Deploy to GitHub Pages → Run workflow**.
 
-**Enlace al despliegue:** pendiente. Todavía no se ha creado el Web Service público de Render, por lo que no se incluye una URL inventada.
+Para que el juego sea funcional en Pages, primero despliega el backend en Render con `npm ci && npm run build` y `npm run start`. Luego crea en GitHub una **Repository variable** llamada `VITE_API_URL` con la URL HTTPS del backend. En Render configura `CORS_ORIGIN` con la URL de Pages.
+
+No necesitas un secret para GitHub Pages: el workflow usa `GITHUB_TOKEN` y los permisos declarados. El único secret opcional de este repositorio es `RENDER_DEPLOY_HOOK_URL`, usado por `.github/workflows/deploy.yml` para disparar Render.
+
+**Enlace esperado de GitHub Pages:** `https://<usuario-o-organizacion>.github.io/react-final-exam/`.

@@ -25,15 +25,16 @@ Se usaron elementos HTML absolutos y CSS en vez de canvas. Para un mapa pequeño
 
 ## Riesgos y mitigaciones
 
-| Riesgo                        | Mitigación                                              |
-| ----------------------------- | ------------------------------------------------------- |
-| Estado visual atrasado        | Polling moderado y servidor como única autoridad.       |
-| Daño repetido dentro de roca  | No se acepta la posición y se invierte orientación.     |
-| Inicio bloqueado              | Radio seguro de cuatro celdas al generar rocas.         |
-| E2E de finalización aleatorio | Ruta de prueba solo con `ENABLE_TEST_ROUTES=true`.      |
-| Fallo E2E sin evidencia       | Actions publica `playwright-report/` y `test-results/`. |
-| Ruta de prueba expuesta       | No se registra sin la variable de entorno exacta.       |
-| Reinicio borra partida        | Limitación documentada; persistencia futura.            |
+| Riesgo                          | Mitigación                                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Estado visual atrasado          | Polling moderado y servidor como única autoridad.                                                             |
+| Daño repetido dentro de roca    | No se acepta la posición y se invierte orientación.                                                           |
+| Inicio bloqueado                | Radio seguro de cuatro celdas al generar rocas.                                                               |
+| E2E de finalización aleatorio   | Ruta de prueba solo con `ENABLE_TEST_ROUTES=true`.                                                            |
+| Fallo E2E sin evidencia         | Actions publica `playwright-report/` y `test-results/`.                                                       |
+| Ruta de prueba expuesta         | No se registra sin la variable de entorno exacta.                                                             |
+| Reinicio borra partida          | Limitación documentada; persistencia futura.                                                                  |
+| GitHub Pages no ejecuta Express | Pages publica solo `client/dist`; `VITE_API_URL` apunta a un backend separado y CORS permite la comunicación. |
 
 ## Cambios relevantes
 
@@ -42,6 +43,7 @@ Se usaron elementos HTML absolutos y CSS en vez de canvas. Para un mapa pequeño
 3. Viento con fechas y `changedRecently` para el aviso temporal.
 4. Frontend con selector, mapa, HUD, impacto, resultado y polling.
 5. Playwright, ESLint y workflows independientes de lint, E2E y despliegue.
+6. Workflow adicional de GitHub Pages con base `/react-final-exam/` y assets incluidos en el artefacto estático.
 
 ## Registro de uso de IA
 

@@ -1,6 +1,6 @@
-import express from 'express'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   applyAction,
   createGame,
@@ -9,103 +9,130 @@ import {
   isCreateGameRequest,
   isGameActionRequest,
   startGameLoop,
-} from './game/game-store.js'
+} from "./game/game-store.js";
 
-const app = express()
-const port = Number(process.env.PORT) || 3000
-const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
-const clientBuildDirectory = path.resolve(currentDirectory, '../../client/dist')
-const gameAssetsDirectory = path.resolve(currentDirectory, '../../Assets')
+const app = express();
+const port = Number(process.env.PORT) || 3000;
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+const clientBuildDirectory = path.resolve(
+  currentDirectory,
+  "../../client/dist",
+);
+const gameAssetsDirectory = path.resolve(currentDirectory, "../../Assets");
 
-app.use(express.json())
+app.use(express.json());
+app.use((_request, response, next) => {
+  response.header(
+    "Access-Control-Allow-Origin",
+    process.env.CORS_ORIGIN || "*",
+  );
+  response.header("Access-Control-Allow-Headers", "Content-Type");
+  response.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
 
-app.get('/api/health', (_request, response) => {
-  response.json({ status: 'ok' })
-})
+  if (_request.method === "OPTIONS") {
+    response.sendStatus(204);
+    return;
+  }
 
-app.post('/api/echo', (request, response) => {
-  response.json(request.body)
-})
+  next();
+});
 
-app.post('/api/games', (request, response) => {
+app.get("/api/health", (_request, response) => {
+  response.json({ status: "ok" });
+});
+
+app.post("/api/echo", (request, response) => {
+  response.json(request.body);
+});
+
+app.post("/api/games", (request, response) => {
   if (!isCreateGameRequest(request.body)) {
     response.status(400).json({
-      error: 'Se requieren dos jugadores distintos: primero pirate y segundo ghost.',
-    })
-    return
+      error:
+        "Se requieren dos jugadores distintos: primero pirate y segundo ghost.",
+    });
+    return;
   }
 
-  response.status(201).json(createGame(request.body))
-})
+  response.status(201).json(createGame(request.body));
+});
 
-app.get('/api/games/:id', (request, response) => {
-  const game = getGame(request.params.id)
+app.get("/api/games/:id", (request, response) => {
+  const game = getGame(request.params.id);
 
   if (!game) {
-    response.status(404).json({ error: 'Partida no encontrada.' })
-    return
+    response.status(404).json({ error: "Partida no encontrada." });
+    return;
   }
 
-  response.json(game)
-})
+  response.json(game);
+});
 
-app.post('/api/games/:id/action', (request, response) => {
-  const game = getGame(request.params.id)
+app.post("/api/games/:id/action", (request, response) => {
+  const game = getGame(request.params.id);
 
   if (!game) {
-    response.status(404).json({ error: 'Partida no encontrada.' })
-    return
+    response.status(404).json({ error: "Partida no encontrada." });
+    return;
   }
 
   if (!isGameActionRequest(request.body)) {
     response.status(400).json({
-      error: 'Acción inválida. Use turn_left, turn_right, turn_to con direction o shoot.',
-    })
-    return
+      error:
+        "Acción inválida. Use turn_left, turn_right, turn_to con direction o shoot.",
+    });
+    return;
   }
 
   if (!game.players.some((player) => player.id === request.body.playerId)) {
-    response.status(403).json({ error: 'El jugador no pertenece a esta partida.' })
-    return
+    response
+      .status(403)
+      .json({ error: "El jugador no pertenece a esta partida." });
+    return;
   }
 
-  if (game.status === 'finalizada') {
-    response.status(409).json({ error: 'La partida ya finalizó.' })
-    return
+  if (game.status === "finalizada") {
+    response.status(409).json({ error: "La partida ya finalizó." });
+    return;
   }
 
-  applyAction(game, request.body)
-  response.json(game)
-})
+  applyAction(game, request.body);
+  response.json(game);
+});
 
-if (process.env.ENABLE_TEST_ROUTES === 'true') {
-  app.post('/api/games/:id/test/finish', (request, response) => {
-    const game = getGame(request.params.id)
-    const winnerPlayerId = request.body?.winnerPlayerId
+if (process.env.ENABLE_TEST_ROUTES === "true") {
+  app.post("/api/games/:id/test/finish", (request, response) => {
+    const game = getGame(request.params.id);
+    const winnerPlayerId = request.body?.winnerPlayerId;
 
     if (!game) {
-      response.status(404).json({ error: 'Partida no encontrada.' })
-      return
+      response.status(404).json({ error: "Partida no encontrada." });
+      return;
     }
 
-    if (typeof winnerPlayerId !== 'string' || !forceFinishGame(game, winnerPlayerId)) {
-      response.status(400).json({ error: 'No se pudo finalizar la partida de prueba.' })
-      return
+    if (
+      typeof winnerPlayerId !== "string" ||
+      !forceFinishGame(game, winnerPlayerId)
+    ) {
+      response
+        .status(400)
+        .json({ error: "No se pudo finalizar la partida de prueba." });
+      return;
     }
 
-    response.json(game)
-  })
+    response.json(game);
+  });
 }
 
-app.use('/Assets', express.static(gameAssetsDirectory))
-app.use(express.static(clientBuildDirectory))
+app.use("/Assets", express.static(gameAssetsDirectory));
+app.use(express.static(clientBuildDirectory));
 
-app.get('/{*path}', (_request, response) => {
-  response.sendFile(path.join(clientBuildDirectory, 'index.html'))
-})
+app.get("/{*path}", (_request, response) => {
+  response.sendFile(path.join(clientBuildDirectory, "index.html"));
+});
 
-startGameLoop()
+startGameLoop();
 
 app.listen(port, () => {
-  console.log(`Servidor disponible en http://localhost:${port}`)
-})
+  console.log(`Servidor disponible en http://localhost:${port}`);
+});
