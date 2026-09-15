@@ -1,6 +1,6 @@
 export type Character = 'pirate' | 'ghost'
 
-export type GameStatus = 'waiting' | 'in_progress' | 'finished'
+export type GameStatus = 'esperando' | 'en_curso' | 'finalizada'
 
 export type Direction =
   | 'north'

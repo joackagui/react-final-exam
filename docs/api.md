@@ -22,7 +22,7 @@ Crea una partida con los dos personajes ya seleccionados. El orden es parte del 
 ```json
 {
   "id": "c7819956-1d94-4f4d-9ea1-f0d10b576d57",
-  "status": "in_progress",
+  "status": "en_curso",
   "createdAt": "2026-09-14T23:30:00.000Z",
   "players": [
     { "id": "ana", "number": 1, "character": "pirate", "shipId": "ship-pirate" },

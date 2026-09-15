@@ -97,7 +97,7 @@ export function createGame(request: CreateGameRequest): Game {
 
   const game: Game = {
     id: randomUUID(),
-    status: 'in_progress',
+    status: 'en_curso',
     createdAt: createdAt.toISOString(),
     players: [piratePlayer, ghostPlayer],
     ships: [pirateShip, ghostShip],
