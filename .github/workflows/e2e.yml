@@ -17,12 +17,15 @@ jobs:
           cache: npm
       - run: npm ci --include=dev --include=optional
       - run: npx playwright install --with-deps chromium
-      - name: Run local E2E suite
-        if: ${{ env.E2E_BASE_URL == '' }}
-        run: npm run test:e2e
-      - name: Run production E2E suite
-        if: ${{ env.E2E_BASE_URL != '' }}
-        run: npm run test:e2e:production
+      - name: Run selected E2E suite
+        run: |
+          if [ -n "$E2E_BASE_URL" ]; then
+            echo "Running production E2E suite against configured E2E_BASE_URL."
+            npm run test:e2e:production
+          else
+            echo "E2E_BASE_URL is empty; running the local E2E suite."
+            npm run test:e2e
+          fi
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
