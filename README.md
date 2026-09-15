@@ -6,7 +6,7 @@ Juego naval top-down local para dos personas. React representa la partida y Expr
 
 ## Requisitos e instalación
 
-- Node.js 22 o superior y npm.
+- Node.js 22.x y npm.
 - Para E2E headless: `npx playwright install chromium` después de instalar dependencias.
 - Para pruebas visuales: Google Chrome instalado localmente.
 
@@ -14,6 +14,10 @@ Juego naval top-down local para dos personas. React representa la partida y Expr
 npm ci
 npx playwright install chromium
 ```
+
+El frontend usa Vite 6 para evitar dependencias nativas opcionales de Rolldown en
+los builds Linux de Render y GitHub Actions. El repositorio usa un único
+`package-lock.json` en la raíz; no se debe crear otro dentro de `client/`.
 
 `npm install` también funciona durante el desarrollo cuando se necesita regenerar el lockfile. El comando recomendado para una instalación reproducible es `npm ci`.
 
@@ -96,7 +100,9 @@ NODE_ENV: production
 
 El workflow `.github/workflows/pages.yml` instala dependencias, construye `client/` con base `/react-final-exam/`, sube `client/dist` y lo despliega con Pages. Se activa al hacer push a `main` o manualmente desde **Actions → Deploy to GitHub Pages → Run workflow**.
 
-Para que el juego sea funcional en Pages, primero despliega el backend en Render con `npm ci && npm run build` y `npm run start`. Luego crea en GitHub una **Repository variable** llamada `VITE_API_URL` con la URL HTTPS del backend. En Render configura `CORS_ORIGIN` con la URL de Pages.
+Para que el juego sea funcional en Pages, primero despliega el backend en Render con `npm ci --include=dev --include=optional && npm run build` y `npm run start`. Luego crea en GitHub una **Repository variable** llamada `VITE_API_URL` con la URL HTTPS del backend. En Render configura `CORS_ORIGIN` con la URL de Pages.
+
+El log con rutas como `/opt/render/project/src` pertenece a Render, aunque el error se haya detectado mientras se configuraba Vercel. Vercel solo publica el frontend mediante `vercel.json`; no ejecuta esta API Express.
 
 No necesitas un secret para GitHub Pages: el workflow usa `GITHUB_TOKEN` y los permisos declarados. El único secret opcional de este repositorio es `RENDER_DEPLOY_HOOK_URL`, usado por `.github/workflows/deploy.yml` para disparar Render.
 
