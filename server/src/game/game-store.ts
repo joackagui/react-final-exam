@@ -13,8 +13,11 @@ import type {
 
 const GRID_WIDTH = 30
 const GRID_HEIGHT = 18
-const OBSTACLE_COUNT = 18
+const MIN_OBSTACLE_COUNT = 8
+const MAX_OBSTACLE_COUNT = 15
+const STARTING_AREA_RADIUS = 4
 const WIND_CHANGE_INTERVAL_MS = 30_000
+const WIND_NOTICE_DURATION_MS = 3_000
 const TICK_MS = 100
 const PROJECTILE_SPEED = 6
 const WIND_PROJECTILE_INFLUENCE = 0.5
@@ -66,18 +69,25 @@ function randomDirection(): Direction {
   return directions[Math.floor(Math.random() * directions.length)]
 }
 
+function isNearStartingArea(position: GridPosition, startingPositions: GridPosition[]): boolean {
+  return startingPositions.some(
+    (startingPosition) => Math.hypot(position.x - startingPosition.x, position.y - startingPosition.y) < STARTING_AREA_RADIUS,
+  )
+}
+
 function generateObstacles(protectedPositions: GridPosition[]): Obstacle[] {
   const obstacles: Obstacle[] = []
   const occupiedCells = new Set(protectedPositions.map(({ x, y }) => `${x},${y}`))
+  const obstacleCount = MIN_OBSTACLE_COUNT + Math.floor(Math.random() * (MAX_OBSTACLE_COUNT - MIN_OBSTACLE_COUNT + 1))
 
-  while (obstacles.length < OBSTACLE_COUNT) {
+  while (obstacles.length < obstacleCount) {
     const position = {
       x: Math.floor(Math.random() * GRID_WIDTH),
       y: Math.floor(Math.random() * GRID_HEIGHT),
     }
     const cellKey = `${position.x},${position.y}`
 
-    if (occupiedCells.has(cellKey)) {
+    if (occupiedCells.has(cellKey) || isNearStartingArea(position, protectedPositions)) {
       continue
     }
 
@@ -154,6 +164,7 @@ export function createGame(request: CreateGameRequest): Game {
       direction: randomDirection(),
       changedAt: createdAt.toISOString(),
       nextChangeAt: new Date(createdAt.getTime() + WIND_CHANGE_INTERVAL_MS).toISOString(),
+      changedRecently: false,
     },
     activeProjectiles: [],
     winnerPlayerId: null,
@@ -164,7 +175,13 @@ export function createGame(request: CreateGameRequest): Game {
 }
 
 export function getGame(gameId: string): Game | undefined {
-  return games.get(gameId)
+  const game = games.get(gameId)
+
+  if (game) {
+    updateWindNotice(game, new Date())
+  }
+
+  return game
 }
 
 function rotateShip(ship: Ship, elapsedSeconds: number): void {
@@ -262,13 +279,19 @@ function moveProjectile(game: Game, projectile: Projectile, elapsedSeconds: numb
 }
 
 function changeWindIfNeeded(game: Game, now: Date): void {
-  if (now.getTime() < new Date(game.wind.nextChangeAt).getTime()) {
-    return
+  if (now.getTime() >= new Date(game.wind.nextChangeAt).getTime()) {
+    game.wind.direction = randomDirection()
+    game.wind.changedAt = now.toISOString()
+    game.wind.nextChangeAt = new Date(now.getTime() + WIND_CHANGE_INTERVAL_MS).toISOString()
+    game.wind.changedRecently = true
   }
 
-  game.wind.direction = randomDirection()
-  game.wind.changedAt = now.toISOString()
-  game.wind.nextChangeAt = new Date(now.getTime() + WIND_CHANGE_INTERVAL_MS).toISOString()
+  updateWindNotice(game, now)
+}
+
+function updateWindNotice(game: Game, now: Date): void {
+  const changedAt = new Date(game.wind.changedAt).getTime()
+  game.wind.changedRecently = now.getTime() - changedAt < WIND_NOTICE_DURATION_MS
 }
 
 function tickGame(game: Game, elapsedSeconds: number, now: Date): void {
@@ -343,6 +366,19 @@ export function applyAction(game: Game, request: GameActionRequest): void {
     active: true,
   }))
   game.activeProjectiles.push(...bullets)
+}
+
+/** Solo se invoca desde las pruebas E2E habilitadas explícitamente. */
+export function forceFinishGame(game: Game, winnerPlayerId: string): boolean {
+  const winner = game.ships.find((ship) => ship.playerId === winnerPlayerId)
+  const loser = game.ships.find((ship) => ship.playerId !== winnerPlayerId)
+
+  if (!winner || !loser || game.status === 'finalizada') {
+    return false
+  }
+
+  damageShip(game, loser, loser.health)
+  return true
 }
 
 export function isCreateGameRequest(value: unknown): value is CreateGameRequest {

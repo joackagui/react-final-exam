@@ -52,6 +52,7 @@ export interface Wind {
   direction: Direction
   changedAt: string
   nextChangeAt: string
+  changedRecently: boolean
 }
 
 export interface Projectile {

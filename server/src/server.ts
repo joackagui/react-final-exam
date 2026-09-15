@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import {
   applyAction,
   createGame,
+  forceFinishGame,
   getGame,
   isCreateGameRequest,
   isGameActionRequest,
@@ -14,6 +15,7 @@ const app = express()
 const port = Number(process.env.PORT) || 3000
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 const clientBuildDirectory = path.resolve(currentDirectory, '../../client/dist')
+const gameAssetsDirectory = path.resolve(currentDirectory, '../../Assets')
 
 app.use(express.json())
 
@@ -76,6 +78,26 @@ app.post('/api/games/:id/action', (request, response) => {
   response.json(game)
 })
 
+if (process.env.ENABLE_TEST_ROUTES === 'true') {
+  app.post('/api/games/:id/test/finish', (request, response) => {
+    const game = getGame(request.params.id)
+    const winnerPlayerId = request.body?.winnerPlayerId
+
+    if (!game) {
+      response.status(404).json({ error: 'Partida no encontrada.' })
+      return
+    }
+
+    if (typeof winnerPlayerId !== 'string' || !forceFinishGame(game, winnerPlayerId)) {
+      response.status(400).json({ error: 'No se pudo finalizar la partida de prueba.' })
+      return
+    }
+
+    response.json(game)
+  })
+}
+
+app.use('/Assets', express.static(gameAssetsDirectory))
 app.use(express.static(clientBuildDirectory))
 
 app.get('/{*path}', (_request, response) => {
