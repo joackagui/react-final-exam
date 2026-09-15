@@ -23,6 +23,8 @@ El viento usa `changedAt` y `nextChangeAt` ISO. Cada tick compara la hora del se
 
 Se usaron elementos HTML absolutos y CSS en vez de canvas. Para un mapa pequeño, React puede declarar rocas, barcos y proyectiles desde el estado; CSS rota sprites y anima el impacto sin añadir un ciclo de dibujo imperativo.
 
+Los proyectiles se representan como balas de cañón oscuras mediante CSS: el cuerpo negro busca una apariencia más realista y el borde y la estela naranja conservan una referencia visual a la pólvora. Así se mantiene la visibilidad sobre el mar sin agregar una librería de gráficos.
+
 ## Riesgos y mitigaciones
 
 | Riesgo                          | Mitigación                                                                                                    |
@@ -48,10 +50,9 @@ Se usaron elementos HTML absolutos y CSS en vez de canvas. Para un mapa pequeño
 
 ## Registro de uso de IA
 
-| Prompt/etapa       | Qué se le pidió                               | Qué se incorporó                                             | Qué verifiqué                                                                                          |
-| ------------------ | --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Lógica de acciones | Movimiento, disparos, colisiones, tick y REST | `Game`, acciones, tick de 100 ms, proyectiles y errores HTTP | Build y solicitudes locales: 404, 403 y tres proyectiles.                                              |
-| Frontend           | Selector, mapa, HUD, controles y assets       | React con polling de 120 ms, teclas, sprites y pantallas     | Build de Vite exitoso.                                                                                 |
-| Mapa y viento      | Rocas aleatorias y aviso temporal             | 8–15 rocas, radio seguro, fechas y `changedRecently`         | Partida con 10 rocas, inicio protegido y viento inicial.                                               |
-| E2E                | Playwright y finalización controlada          | Cuatro pruebas y ruta de prueba condicionada                 | `npm run test:e2e`: 4 pruebas aprobadas; también se comprobó la prueba específica de barcos y nombres. |
-| Calidad y CI/CD    | ESLint, Actions y Render                      | ESLint TS, workflows y Deploy Hook                           | `npm run lint`, build y E2E aprobados.                                                                 |
+La IA se utilizó como apoyo puntual y no como fuente principal del desarrollo. La mayor parte de la implementación, las decisiones de diseño, la integración React-Express y las pruebas fueron realizadas y verificadas por el estudiante. Se consultó para aclarar errores, revisar alternativas y obtener sugerencias concretas; cada propuesta incorporada se adaptó al proyecto y se comprobó localmente.
+
+| Uso puntual      | Para qué se consultó                            | Qué se incorporó                                 | Qué verificó el estudiante                                  |
+| ---------------- | ----------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| Revisión técnica | Errores de workflow, despliegue y documentación | Ajustes menores en Actions, README y documentos  | Build, lint, pruebas E2E y ejecución local.                 |
+| Revisión visual  | Alternativas para representar la bala           | Bala negra con borde y estela naranja de pólvora | Interfaz compilada y comportamiento visual en el navegador. |

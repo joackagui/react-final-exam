@@ -305,10 +305,10 @@ button:focus-visible {
   z-index: 4;
   width: 0.65rem;
   aspect-ratio: 1;
-  border: 2px solid #fff6c8;
+  border: 2px solid #f28b2e;
   border-radius: 50%;
-  background: #ff9f32;
-  box-shadow: 0 0 0.8rem #ffe07c;
+  background: #17191b;
+  box-shadow: 0 0 0.45rem rgba(255, 143, 45, 0.95);
   transform: translate(-50%, -50%) rotate(var(--projectile-angle));
 }
 
@@ -319,7 +319,8 @@ button:focus-visible {
   width: 0.8rem;
   height: 0.16rem;
   content: "";
-  background: rgba(255, 224, 124, 0.8);
+  background: linear-gradient(90deg, rgba(255, 193, 92, 0.05), #f28b2e);
+  box-shadow: 0 0 0.45rem rgba(255, 143, 45, 0.8);
   transform: translateY(-50%);
 }
 

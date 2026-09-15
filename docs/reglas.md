@@ -27,6 +27,6 @@ Al chocar con una roca el barco conserva posición, pierde 10 de vida y rebota i
 
 ## Interacción y final
 
-Al disparar se generan tres proyectiles desde el barco. Desaparecen al salir del mapa o tocar roca; al impactar el rival aplican 20 de daño si los lanzó Pirata o 25 si los lanzó Fantasma. Barcos y proyectiles se mueven; rocas son fijas.
+Al disparar se generan tres proyectiles desde el barco. Desaparecen al salir del mapa o tocar roca; al impactar el rival aplican 20 de daño si los lanzó Pirata o 25 si los lanzó Fantasma. Las balas se muestran negras, como una bala de cañón, con un borde y una estela naranja que representan la pólvora. Barcos y proyectiles se mueven; rocas son fijas.
 
 Los estados principales son `en_curso` y `finalizada` (el tipo también contempla `esperando`, aunque la creación inicia en curso). Al llegar una vida a cero, Express fija el ganador, elimina proyectiles y rechaza acciones con HTTP 409. React muestra el resultado y **Reiniciar** vuelve al selector.

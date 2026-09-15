@@ -77,10 +77,10 @@ Crea una partida con los dos personajes ya seleccionados. El orden es parte del 
       "orientationDegrees": 45,
       "targetOrientation": "north_east",
       "targetOrientationDegrees": 45,
-      "angularSpeedDegreesPerSecond": 180,
+      "angularSpeedDegreesPerSecond": 45,
       "speed": "high",
-      "baseSpeed": 2.4,
-      "effectiveSpeed": 2.4,
+      "baseSpeed": 1.35,
+      "effectiveSpeed": 1.35,
       "health": 80,
       "maxHealth": 80,
       "shotDamage": 20
@@ -94,10 +94,10 @@ Crea una partida con los dos personajes ya seleccionados. El orden es parte del 
       "orientationDegrees": 225,
       "targetOrientation": "south_west",
       "targetOrientationDegrees": 225,
-      "angularSpeedDegreesPerSecond": 180,
+      "angularSpeedDegreesPerSecond": 45,
       "speed": "medium",
-      "baseSpeed": 1.8,
-      "effectiveSpeed": 1.8,
+      "baseSpeed": 1.05,
+      "effectiveSpeed": 1.05,
       "health": 100,
       "maxHealth": 100,
       "shotDamage": 25
@@ -155,9 +155,9 @@ Devuelve el mismo esquema completo de estado de `POST /api/games`, incluyendo ju
 
 ## `POST /api/games/:id/action`
 
-Aplica una acción al estado autoritativo del servidor y devuelve la partida actualizada. El barco siempre avanza en su orientación actual: los giros cambian el objetivo de orientación y el bucle del servidor rota progresivamente a `180` grados por segundo.
+Aplica una acción al estado autoritativo del servidor y devuelve la partida actualizada. El barco siempre avanza en su orientación actual: los giros cambian el objetivo de orientación y el bucle del servidor rota progresivamente a `45` grados por segundo.
 
-### Girar 90 grados
+### Girar 12 grados
 
 ```json
 {

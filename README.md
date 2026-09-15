@@ -2,7 +2,7 @@
 
 Juego naval top-down local para dos personas. React representa la partida y Express conserva el estado autoritativo: movimiento, viento, daños, proyectiles y victoria.
 
-> **Despliegue:** el frontend se publica en GitHub Pages y el backend Express debe publicarse por separado. La URL final depende del usuario/organización de GitHub y del Web Service de backend.
+> **Despliegue:** Render puede publicar el frontend compilado y el backend Express desde un único Web Service. GitHub Pages y Vercel también pueden publicar el frontend por separado, pero no ejecutan la API Express.
 
 ## Requisitos e instalación
 
@@ -102,7 +102,7 @@ El workflow `.github/workflows/pages.yml` instala dependencias, construye `clien
 
 Para que el juego sea funcional en Pages, primero despliega el backend en Render con `npm ci --include=dev --include=optional && npm run build` y `npm run start`. Luego crea en GitHub una **Repository variable** llamada `VITE_API_URL` con la URL HTTPS del backend. En Render configura `CORS_ORIGIN` con la URL de Pages.
 
-El log con rutas como `/opt/render/project/src` pertenece a Render, aunque el error se haya detectado mientras se configuraba Vercel. Vercel solo publica el frontend mediante `vercel.json`; no ejecuta esta API Express.
+El log con rutas como `/opt/render/project/src` pertenece a Render, aunque el error se haya detectado mientras se configuraba Vercel. Vercel solo publica el frontend mediante `vercel.json`; no ejecuta esta API Express. Para entregar la aplicación completa con una sola URL, usa el Web Service de Render, que ejecuta `npm run start` y sirve `client/dist` junto con `/api`.
 
 No necesitas un secret para GitHub Pages: el workflow usa `GITHUB_TOKEN` y los permisos declarados. `RENDER_DEPLOY_HOOK_URL` es opcional: si existe, `.github/workflows/deploy.yml` lo usa para disparar Render; si no existe, el build pasa pero Render no se dispara desde GitHub Actions. En ese caso Render puede desplegar automáticamente desde su integración con la rama `main`.
 

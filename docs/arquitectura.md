@@ -25,11 +25,14 @@ El servidor guarda `wind.changedAt` y `wind.nextChangeAt` como fechas ISO. En ca
 
 Esta decisión mantiene al servidor como autoridad de la simulación y funciona con REST y polling. El calendario no se persiste: las partidas viven en memoria, así que reiniciar Express elimina las partidas activas y sus próximos cambios de viento. Para recuperarlas después de un reinicio sería necesario persistir el estado y sus marcas de tiempo en una base de datos.
 
-## Endpoints iniciales
+## Endpoints principales
 
-| Método | Ruta | Entrada JSON | Salida JSON |
-| --- | --- | --- | --- |
-| GET | `/api/health` | No aplica | `{ "status": "ok" }` |
-| POST | `/api/echo` | Cualquier cuerpo JSON | El mismo cuerpo JSON |
+| Método | Ruta                    | Entrada JSON             | Salida JSON                  |
+| ------ | ----------------------- | ------------------------ | ---------------------------- |
+| GET    | `/api/health`           | No aplica                | `{ "status": "ok" }`         |
+| POST   | `/api/echo`             | Cualquier cuerpo JSON    | El mismo cuerpo JSON         |
+| POST   | `/api/games`            | Dos jugadores JSON       | Estado inicial de la partida |
+| GET    | `/api/games/:id`        | Identificador de partida | Estado actualizado           |
+| POST   | `/api/games/:id/action` | Jugador y acción JSON    | Estado después de la acción  |
 
-La lógica de juego se añadirá después. Cuando exista, el backend asumirá responsabilidades significativas de la partida conforme a la consigna.
+Express valida las solicitudes, crea las partidas, conserva el estado, ejecuta el tick de movimiento, aplica viento, resuelve colisiones y calcula daños y victoria. La ruta de finalización de prueba solo se registra con `ENABLE_TEST_ROUTES=true`.
