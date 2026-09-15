@@ -104,6 +104,6 @@ Para que el juego sea funcional en Pages, primero despliega el backend en Render
 
 El log con rutas como `/opt/render/project/src` pertenece a Render, aunque el error se haya detectado mientras se configuraba Vercel. Vercel solo publica el frontend mediante `vercel.json`; no ejecuta esta API Express.
 
-No necesitas un secret para GitHub Pages: el workflow usa `GITHUB_TOKEN` y los permisos declarados. El único secret opcional de este repositorio es `RENDER_DEPLOY_HOOK_URL`, usado por `.github/workflows/deploy.yml` para disparar Render.
+No necesitas un secret para GitHub Pages: el workflow usa `GITHUB_TOKEN` y los permisos declarados. `RENDER_DEPLOY_HOOK_URL` es opcional: si existe, `.github/workflows/deploy.yml` lo usa para disparar Render; si no existe, el build pasa pero Render no se dispara desde GitHub Actions. En ese caso Render puede desplegar automáticamente desde su integración con la rama `main`.
 
 **Enlace esperado de GitHub Pages:** `https://<usuario-o-organizacion>.github.io/react-final-exam/`.
