@@ -17,6 +17,8 @@ type PlayerSetup = {
 
 type Action = "turn_left" | "turn_right" | "shoot";
 
+const TURN_REPEAT_MS = 180;
+
 const initialSetup: [PlayerSetup, PlayerSetup] = [
   { id: "Jugador-1", character: "pirate" },
   { id: "Jugador-2", character: "ghost" },
@@ -225,16 +227,15 @@ function App() {
       pressedKeys.current.delete(event.code);
     }
 
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     const rotationTimer = window.setInterval(() => {
       for (const [key, rotation] of Object.entries(rotationKeys)) {
         if (pressedKeys.current.has(key)) {
           void sendAction(rotation.playerId, rotation.action);
         }
       }
-    }, 180);
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    }, TURN_REPEAT_MS);
 
     return () => {
       window.clearInterval(rotationTimer);
@@ -479,7 +480,11 @@ function App() {
                   : assetUrl("flying-dutchman.png")
               }
               alt=""
-              style={{ transform: `rotate(${ship.orientationDegrees}deg)` }}
+              style={
+                {
+                  "--ship-angle": `${ship.orientationDegrees}deg`,
+                } as React.CSSProperties
+              }
             />
           </div>
         ))}

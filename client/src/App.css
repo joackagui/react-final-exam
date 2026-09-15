@@ -233,10 +233,9 @@ button:focus-visible {
 
 .ship {
   z-index: 3;
-  width: clamp(2.7rem, 5.4vw, 5.8rem);
-  aspect-ratio: 0.45;
+  width: clamp(6rem, 12vw, 12rem);
+  aspect-ratio: 1.83;
   overflow: hidden;
-  border-radius: 46%;
   filter: drop-shadow(0 0.45rem 0.28rem rgba(0, 0, 0, 0.35));
   transition:
     left 120ms linear,
@@ -244,8 +243,12 @@ button:focus-visible {
 }
 
 .ship img {
-  transform-origin: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   object-fit: fill;
+  transform: rotate(var(--ship-angle));
+  transform-origin: center;
   transition: transform 100ms linear;
 }
 
@@ -393,7 +396,7 @@ button:focus-visible {
     gap: 0.1rem;
   }
   .ship {
-    width: clamp(2.2rem, 9vw, 4rem);
+    width: clamp(5rem, 24vw, 9rem);
   }
   .rock-small {
     width: clamp(1.6rem, 7vw, 3rem);

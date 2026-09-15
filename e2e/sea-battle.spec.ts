@@ -40,6 +40,21 @@ test("inicia una partida y renderiza ambos barcos en el mapa", async ({
   await expect(page.getByLabel("Barco Fantasma")).toBeVisible();
   await expect(page.getByText("J1 · pirata-mapa")).toBeVisible();
   await expect(page.getByText("J2 · fantasma-mapa")).toBeVisible();
+
+  const renderedShips = page.locator(".ship");
+  expect(await renderedShips.count()).toBe(2);
+  for (let index = 0; index < 2; index += 1) {
+    const ship = renderedShips.nth(index);
+    const image = ship.locator("img");
+    expect(
+      await image.evaluate(
+        (element) => (element as HTMLImageElement).naturalWidth,
+      ),
+    ).toBeGreaterThan(0);
+    const box = await ship.boundingBox();
+    expect(box?.width).toBeGreaterThan(0);
+    expect(box?.height).toBeGreaterThan(0);
+  }
 });
 
 test("crea la partida mediante POST /api/games y recibe un estado válido", async ({

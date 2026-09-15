@@ -8,7 +8,7 @@ Se eligió un monorepo npm: `client/` para Vite + React, `server/` para Express 
 
 Express ejecuta un tick cada 100 ms para rotar barcos, aplicar viento, mover proyectiles y comprobar impactos. React consulta `GET /api/games/:id` cada 120 ms. Elegimos polling REST porque el alcance pedía `fetch` nativo y las actualizaciones son pequeñas. El costo es hasta unos 120 ms de desfase; WebSockets serían una mejora para más jugadores o menor latencia, pero agregan reconexión y un protocolo de eventos innecesarios aquí.
 
-El viento usa `changedAt` y `nextChangeAt` ISO. Cada tick compara la hora del servidor con `nextChangeAt`; al vencer, selecciona una dirección y programa 30 segundos más. `changedRecently` vale `true` solo durante tres segundos. El estado no es persistente: reiniciar Express elimina partidas; una futura base de datos debería guardar `Game` y sus fechas.
+El viento usa `changedAt` y `nextChangeAt` ISO. Cada tick compara la hora del servidor con `nextChangeAt`; al vencer, selecciona una dirección y programa 30 segundos más. Su influencia es deliberadamente moderada: modifica hasta 10 % la velocidad del barco y la velocidad de giro, y aplica una deriva pequeña a los proyectiles. La conducción usa una velocidad base de 1.35 para Pirata y 1.05 para Fantasma, con giro de 45 grados por segundo. `changedRecently` vale `true` solo durante tres segundos. El estado no es persistente: reiniciar Express elimina partidas; una futura base de datos debería guardar `Game` y sus fechas.
 
 ## Boceto de pantalla
 
@@ -35,6 +35,7 @@ Se usaron elementos HTML absolutos y CSS en vez de canvas. Para un mapa pequeño
 | Ruta de prueba expuesta         | No se registra sin la variable de entorno exacta.                                                             |
 | Reinicio borra partida          | Limitación documentada; persistencia futura.                                                                  |
 | GitHub Pages no ejecuta Express | Pages publica solo `client/dist`; `VITE_API_URL` apunta a un backend separado y CORS permite la comunicación. |
+| Giros poco naturales            | Cada pulsación produce un único giro; no se acumulan órdenes mientras se mantiene la tecla.                   |
 
 ## Cambios relevantes
 

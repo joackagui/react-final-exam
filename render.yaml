@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: react-final-exam-api
+    runtime: node
+    buildCommand: npm ci --include=dev --include=optional && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        sync: false
