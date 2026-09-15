@@ -40,7 +40,7 @@ Para ejecutar la prueba de producción, define la URL pública de Render o del s
 E2E_BASE_URL=https://tu-aplicacion.onrender.com npx playwright test e2e/production.spec.ts --project=chromium
 ```
 
-La variable `E2E_BASE_URL` desactiva el servidor local de Playwright y hace que la prueba use directamente la aplicación publicada. En GitHub Actions, configura una Repository variable con el mismo nombre; el workflow `e2e.yml` la utilizará automáticamente en modo headless.
+La variable `E2E_BASE_URL` desactiva el servidor local de Playwright y hace que la prueba use directamente la aplicación publicada. Debe ser una URL completa con `https://` o `http://`. En GitHub Actions, configura una Repository variable con el mismo nombre; el workflow `e2e.yml` utilizará únicamente `production.spec.ts` en modo headless cuando la variable exista. Si no existe, ejecutará la suite local.
 
 ## Ejecución local paso a paso
 

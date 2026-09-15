@@ -1,6 +1,22 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const productionBaseUrl = process.env.E2E_BASE_URL;
+const productionBaseUrl = process.env.E2E_BASE_URL?.trim();
+
+if (productionBaseUrl) {
+  let parsedBaseUrl: URL;
+
+  try {
+    parsedBaseUrl = new URL(productionBaseUrl);
+  } catch {
+    throw new Error(
+      "E2E_BASE_URL debe ser una URL completa, por ejemplo https://tu-app.onrender.com",
+    );
+  }
+
+  if (!/^https?:$/.test(parsedBaseUrl.protocol)) {
+    throw new Error("E2E_BASE_URL debe comenzar con http:// o https://");
+  }
+}
 
 export default defineConfig({
   testDir: "./e2e",
