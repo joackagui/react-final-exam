@@ -34,6 +34,14 @@ los builds Linux de Render y GitHub Actions. El repositorio usa un único
 
 Para ejecutar solo una prueba o un archivo: `npx playwright test e2e/sea-battle.spec.ts -g "nombre de la prueba"`.
 
+Para ejecutar la prueba de producción, define la URL pública de Render o del servicio que publique frontend y backend:
+
+```bash
+E2E_BASE_URL=https://tu-aplicacion.onrender.com npx playwright test e2e/production.spec.ts --project=chromium
+```
+
+La variable `E2E_BASE_URL` desactiva el servidor local de Playwright y hace que la prueba use directamente la aplicación publicada. En GitHub Actions, configura una Repository variable con el mismo nombre; el workflow `e2e.yml` la utilizará automáticamente en modo headless.
+
 ## Ejecución local paso a paso
 
 1. Instala Node.js 22 o superior.

@@ -14,7 +14,11 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
+Ejecución local verificada:
+
 El resultado comprobado fue **4 pruebas aprobadas**. Para defensa visual: `npm run test:e2e:headed`. El Mac de desarrollo no tenía Google Chrome en `/Applications`, por lo que debe instalarse para este modo. La primera descarga dejó incompleto Chromium headless; Playwright informó el ejecutable faltante y se resolvió instalando `chromium-headless-shell` antes de repetir la suite.
+
+La prueba `e2e/production.spec.ts` permite validar la aplicación publicada sin usar la ruta exclusiva de finalización de pruebas. Se ejecuta con `E2E_BASE_URL=https://tu-aplicacion.onrender.com npx playwright test e2e/production.spec.ts --project=chromium`; Playwright usa la URL indicada y no inicia el servidor local. El workflow `e2e.yml` lee la misma dirección desde la Repository variable `E2E_BASE_URL`, por lo que la ejecución en GitHub Actions permanece headless y comprueba creación de partida, renderizado de los barcos y procesamiento de una acción real.
 
 Fuentes: [Playwright Installation](https://playwright.dev/docs/intro) y [Playwright Web server](https://playwright.dev/docs/test-webserver).
 

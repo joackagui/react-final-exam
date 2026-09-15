@@ -72,6 +72,11 @@ test("crea la partida mediante POST /api/games y recibe un estado válido", asyn
 test("muestra el resultado y reinicia tras finalizar una partida de prueba", async ({
   page,
 }) => {
+  test.skip(
+    Boolean(process.env.E2E_BASE_URL),
+    "La finalización forzada solo existe en el servidor local de pruebas.",
+  );
+
   const game = await createGame(page, "resultado");
   const winnerPlayerId = game.players[0].id;
   const response = await page.request.post(
