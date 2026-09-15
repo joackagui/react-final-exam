@@ -1,7 +1,14 @@
 import express from 'express'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createGame, getGame, isCreateGameRequest } from './game/game-store.js'
+import {
+  applyAction,
+  createGame,
+  getGame,
+  isCreateGameRequest,
+  isGameActionRequest,
+  startGameLoop,
+} from './game/game-store.js'
 
 const app = express()
 const port = Number(process.env.PORT) || 3000
@@ -40,11 +47,42 @@ app.get('/api/games/:id', (request, response) => {
   response.json(game)
 })
 
+app.post('/api/games/:id/action', (request, response) => {
+  const game = getGame(request.params.id)
+
+  if (!game) {
+    response.status(404).json({ error: 'Partida no encontrada.' })
+    return
+  }
+
+  if (!isGameActionRequest(request.body)) {
+    response.status(400).json({
+      error: 'Acción inválida. Use turn_left, turn_right, turn_to con direction o shoot.',
+    })
+    return
+  }
+
+  if (!game.players.some((player) => player.id === request.body.playerId)) {
+    response.status(403).json({ error: 'El jugador no pertenece a esta partida.' })
+    return
+  }
+
+  if (game.status === 'finalizada') {
+    response.status(409).json({ error: 'La partida ya finalizó.' })
+    return
+  }
+
+  applyAction(game, request.body)
+  response.json(game)
+})
+
 app.use(express.static(clientBuildDirectory))
 
 app.get('/{*path}', (_request, response) => {
   response.sendFile(path.join(clientBuildDirectory, 'index.html'))
 })
+
+startGameLoop()
 
 app.listen(port, () => {
   console.log(`Servidor disponible en http://localhost:${port}`)

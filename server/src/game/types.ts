@@ -30,7 +30,13 @@ export interface Ship {
   character: Character
   position: GridPosition
   orientation: Direction
+  orientationDegrees: number
+  targetOrientation: Direction
+  targetOrientationDegrees: number
+  angularSpeedDegreesPerSecond: number
   speed: 'high' | 'medium'
+  baseSpeed: number
+  effectiveSpeed: number
   health: number
   maxHealth: number
   shotDamage: number
@@ -53,6 +59,7 @@ export interface Projectile {
   ownerPlayerId: string
   position: GridPosition
   direction: Direction
+  headingDegrees: number
   speed: number
   damage: number
   active: boolean
@@ -81,4 +88,12 @@ export interface CreateGameRequest {
     { id: string; character: 'pirate' },
     { id: string; character: 'ghost' },
   ]
+}
+
+export type GameAction = 'turn_left' | 'turn_right' | 'turn_to' | 'shoot'
+
+export interface GameActionRequest {
+  playerId: string
+  action: GameAction
+  direction?: Direction
 }

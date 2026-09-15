@@ -98,3 +98,64 @@ Devuelve el mismo esquema completo de estado de `POST /api/games`, incluyendo ju
   "error": "Partida no encontrada."
 }
 ```
+
+## `POST /api/games/:id/action`
+
+Aplica una acción al estado autoritativo del servidor y devuelve la partida actualizada. El barco siempre avanza en su orientación actual: los giros cambian el objetivo de orientación y el bucle del servidor rota progresivamente a `180` grados por segundo.
+
+### Girar 90 grados
+
+```json
+{
+  "playerId": "ana",
+  "action": "turn_right"
+}
+```
+
+También se admite `turn_left`.
+
+### Orientar hacia una tecla/dirección
+
+Esta variante permite al frontend transformar flechas o WASD en una dirección explícita, sin cambiar instantáneamente el ángulo actual:
+
+```json
+{
+  "playerId": "ana",
+  "action": "turn_to",
+  "direction": "north"
+}
+```
+
+Las direcciones válidas son `north`, `north_east`, `east`, `south_east`, `south`, `south_west`, `west` y `north_west`.
+
+### Disparar
+
+```json
+{
+  "playerId": "bruno",
+  "action": "shoot"
+}
+```
+
+El servidor crea tres proyectiles con el daño del barco atacante y devuelve el estado completo de la partida con los proyectiles activos.
+
+### Response `200 OK`
+
+Devuelve el mismo esquema completo de `GET /api/games/:id`. Cada barco incluye `orientationDegrees`, `targetOrientation`, `targetOrientationDegrees`, `baseSpeed` y `effectiveSpeed`; cada proyectil incluye `headingDegrees`.
+
+### Errores
+
+| Estado | Situación | Ejemplo |
+| --- | --- | --- |
+| `400` | Cuerpo o acción inválida | `{ "error": "Acción inválida. Use turn_left, turn_right, turn_to con direction o shoot." }` |
+| `403` | El `playerId` no pertenece a la partida | `{ "error": "El jugador no pertenece a esta partida." }` |
+| `404` | El `id` de partida no existe | `{ "error": "Partida no encontrada." }` |
+| `409` | Se intenta actuar, incluso disparar, tras finalizar | `{ "error": "La partida ya finalizó." }` |
+
+## Decisión técnica: tick con REST
+
+Express ejecuta un tick interno cada `100 ms`. En cada tick, el servidor rota paulatinamente cada barco hacia su objetivo, calcula su velocidad efectiva según la alineación con el viento, lo desplaza hacia delante, mueve proyectiles y resuelve los impactos. El viento se renueva en el servidor cada 30 segundos.
+
+El navegador no simula reglas: envía acciones mediante `fetch` y consulta `GET /api/games/:id` periódicamente para renderizar el estado. Esta decisión respeta la comunicación HTTP REST con JSON y evita que dos clientes produzcan estados distintos sin requerir WebSockets.
+
+Ante una roca, el barco conserva su posición, recibe 10 de daño y rebota invirtiendo de inmediato orientación y objetivo. Es la respuesta más simple que evita que un barco quede aplicando daño repetido contra la misma roca en ticks sucesivos.
