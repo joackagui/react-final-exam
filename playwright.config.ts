@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const productionBaseUrl = process.env.E2E_BASE_URL?.trim();
+const productionBaseUrl = process.env.E2E_BASE_URL?.trim() || undefined;
 
 if (productionBaseUrl) {
   let parsedBaseUrl: URL;
