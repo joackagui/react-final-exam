@@ -337,7 +337,7 @@ function App() {
       <main className="selector-screen" style={seaBackgroundStyle}>
         <section className="selector-card" aria-labelledby="selector-title">
           <div className="selector-heading">
-            <h1 id="selector-title">Elige tu tripulación</h1>
+            <h1 id="selector-title">Escoge tu tripulación</h1>
             <p>El Perla Negra navega rápido</p>
             <p>El Holandes Errante resiste más y causa más daño.</p>
           </div>
